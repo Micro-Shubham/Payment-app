@@ -6,6 +6,7 @@ const zod = require("zod")
 
 const router = express.Router()
 
+// signup Schema using zod
 const signupSchema = zod.object ({
     username: zod.string().email(),
     password: zod.string(),
@@ -51,6 +52,45 @@ router.post("/signup", async (req,res) =>{
     message:"user created successfully",
     token:token
    })
+})
+
+
+
+// sign in schema
+const signinSchema = zod.object({
+    username: zod.string().email(),
+    password: zod.string(),
+})
+
+
+router.post("/signin", async (req, res) => {
+    const {success} = signinSchema.safeParse(req.body)
+    if(!success) {
+        return res.status(411).json("incorrect input")
+    }
+
+
+
+   const user = await User.findOne({
+    username: req.body.username,
+    password:req.body.password,
+  })
+   // if that user exist then
+    if(user) {
+    const token = jwt.sign({
+        userId:user._id,
+
+    }, JWT_SECRET);
+
+     res.json({
+        token:token
+     })
+     return;
+  }
+
+  res.status(411).json({
+    message:"Error while loggin in"
+  })
 })
 
 module.exports = router;
