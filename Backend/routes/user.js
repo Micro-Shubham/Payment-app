@@ -24,7 +24,7 @@ router.post("/signup", async (req,res) =>{
     })
    } 
 
-   const ExistingUser =  User.findOne({
+   const ExistingUser = await User.findOne({
     username: body.username
    })
 
@@ -34,6 +34,14 @@ router.post("/signup", async (req,res) =>{
     })
    }
 
+
+
+   const user = await User.create({
+    username: req.body.username,
+    password: req.body.password,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+   })
 
    const dbUser = await User.create(body);
    const token = jwt.sign({
