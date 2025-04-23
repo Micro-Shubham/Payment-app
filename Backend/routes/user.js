@@ -126,4 +126,39 @@ router.put("/",authmiddleware,async (req,res) =>{
    }
 })
 
+
+
+// Route to get users from the backend, filterable via firstName/lastName
+
+// This is needed so users can search for their friends and send them money
+
+router.get("/bulk", async(req,res) => {
+    const filterData = req.query.filterData || ""
+
+   try{
+    const users = await User.find({
+     $or: [
+        {firstName:{$regex: filterData, $options:"i"}},
+        {lastName:{$regex:filterData, $options:"i"}}
+     ]
+    })
+
+    res.json({
+        user: users.map(user => ({
+            username:user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    })
+   } catch(err) {
+     res.status(500).json({error:"server error", details:err.message})
+   }
+    
+     
+})
+
+
+
+
 module.exports = router;
