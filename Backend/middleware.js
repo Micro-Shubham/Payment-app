@@ -18,8 +18,12 @@ const authenticationMiddleware = (req, res, next) => {
 
     try{
         const decoded = jwt.verify(token,JWT_SECRET);
+        if(decoded.userId) { 
         req.userId = decoded.userId;
         next();
+        } else {
+            return res.status(403).json({error:"wrong userId/userId not found"})
+        }
     }  catch(err) {
         return res.status(403).json({error:"Inavalid Token"})
     }

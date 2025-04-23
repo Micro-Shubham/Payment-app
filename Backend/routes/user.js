@@ -2,6 +2,7 @@ const express = require("express")
 const {User} = require("../db")
 const jwt = require("jsonwebtoken")
 const JWT_SECRET = require("../config")
+const {authmiddleware} = require("../middleware")
 const zod = require("zod")
 
 const router = express.Router()
@@ -91,6 +92,38 @@ router.post("/signin", async (req, res) => {
   res.status(411).json({
     message:"Error while loggin in"
   })
+})
+
+
+
+// route to update the user Information
+
+const updateBody = zod.object({
+    password:zod.string().min(6,"Password should be atlest 6 character").optional(),
+    firstName:zod.string().min(1,"First name cannot be empty").optional(),
+    lastName:zod.string().min(1,"Last name cannot be empty").optional()
+})
+
+
+router.put("/",authmiddleware,async (req,res) =>{
+
+    const {success} = updateBody.safeParse(req.body)
+    if(!success) {
+        return res.status(411).json({error:"error while updating information" })
+    }
+
+  try{
+    await User.updateOne({_id:req.userId},req.body)
+    res.json({
+        message:"udpated successfully"
+    })
+  } catch (err) {
+   console.log(err)
+    res.status(500).json({
+        error: "server error",
+        details: err.message
+    })
+   }
 })
 
 module.exports = router;
