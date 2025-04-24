@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
+require('dotenv').config(); 
 // connect mongodb locally
-mongoose.connect("mongodb://localhost:27017/paytm")
+mongoose.connect(process.env.MONGO_URL)
 
 
 // creating user Schema 
@@ -35,9 +36,7 @@ const userSchema = new mongoose.Schema({
 
 // user model
 const User = mongoose.model("User", userSchema);
-module.exports = {
-    User
-}
+
 
 
 // creating account schema 
@@ -58,5 +57,7 @@ const accountSchema = new mongoose.Schema({
 const Account = mongoose.model('Account', accountSchema)
 
 module.exports = {
+    User,
     Account
+
 }
