@@ -1,14 +1,17 @@
 const express = require("express")
+const app = express()
 const cors = require('cors')
 // apply cors to all routes
 app.use(cors());
 // json body parsor
 app.use(express.json())
+
+// Import the mainRouter from the routes folder
 const mainRouter = require("./routes/index")
-const app = express();
 
 
 
+// Use the mainRouter for the '/api/v1/' route
 app.use("/api/v1/",  mainRouter)
 
 

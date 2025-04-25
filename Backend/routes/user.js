@@ -1,11 +1,11 @@
 const express = require("express")
-const {User} = require("../db")
-const jwt = require("jsonwebtoken")
-const JWT_SECRET = require("../config")
-const {authmiddleware} = require("../middleware")
-const zod = require("zod")
-
 const router = express.Router()
+const zod = require("zod")
+const {User,Account} = require("../db")
+const jwt = require("jsonwebtoken")
+const {JWT_SECRET} = require("../config").default
+const {authMiddleware} = require("../middleware")
+
 
 // signup Schema using zod
 const signupSchema = zod.object ({
@@ -18,10 +18,9 @@ const signupSchema = zod.object ({
 
 // sign up routes
 router.post("/signup", async (req,res) =>{ 
-    const body = req.body;
     const {success} = signupSchema.safeParse(req.body);
    if(!success) {
-    return res.json({
+    return res.status(411).json({
         message:"Email already taken/ Incorrect Inputs"
     })
    } 
@@ -112,26 +111,23 @@ const updateBody = zod.object({
     lastName:zod.string().min(1,"Last name cannot be empty").optional()
 })
 
-
-router.put("/",authmiddleware,async (req,res) =>{
+console.log(authMiddleware)
+router.put("/",authMiddleware,async (req,res) =>{
 
     const {success} = updateBody.safeParse(req.body)
     if(!success) {
-        return res.status(411).json({error:"error while updating information" })
+         return res.status(411).json({error:"error while updating information" })
     }
-
-  try{
-    await User.updateOne({_id:req.userId},req.body)
+  try {
+    await User.updateOne( req.body , {id:req.userId})
     res.json({
         message:"udpated successfully"
     })
-  } catch (err) {
-   console.log(err)
-    res.status(500).json({
-        error: "server error",
-        details: err.message
-    })
-   }
+} catch (err){ 
+ console.log(err);
+ res.json("invalid")
+}
+ 
 })
 
 
@@ -143,7 +139,6 @@ router.put("/",authmiddleware,async (req,res) =>{
 router.get("/bulk", async(req,res) => {
     const filterData = req.query.filterData || ""
 
-   try{
     const users = await User.find({
      $or: [
         {firstName:{$regex: filterData, $options:"i"}},
@@ -159,9 +154,7 @@ router.get("/bulk", async(req,res) => {
             _id: user._id
         }))
     })
-   } catch(err) {
-     res.status(500).json({error:"server error", details:err.message})
-   }
+  
     
      
 })

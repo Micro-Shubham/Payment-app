@@ -1,20 +1,20 @@
-const {JWT_SECRET} = require("./config")
+const {JWT_SECRET} = require("./config").default
 const jwt = require("jsonwebtoken")
 
 
-const authenticationMiddleware = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
 
     // Get the Authorization header  from the request
-    const authenticatoinHeader = req.headers.authorization
+    const authenticationHeader = req.headers.authorization
     
 
-    if(!authenticatoinHeader || !authenticatoinHeader.starsWith('Bearere')) {
+    if(!authenticationHeader || !authenticationHeader.statsWith('Bearer ')) {
 
         return res.status(403).json({error: "unauthorized"})
 
     }
          // Extract the token from the  "Bearer <token>  " string
-    const token =authenticatoinHeader.split('')[1];
+    const token =authenticatoinHeader.split(' ')[1];
 
     try{
         const decoded = jwt.verify(token,JWT_SECRET);
@@ -32,5 +32,5 @@ const authenticationMiddleware = (req, res, next) => {
 
 
 module.exports = {
-    authenticationMiddleware
+    authMiddleware
 }
